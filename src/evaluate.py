@@ -1,32 +1,41 @@
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix,
+    classification_report
+)
 
 
 def evaluate(model, X_test, y_test):
 
     prediction = model.predict(X_test)
+    probability = model.predict_proba(X_test)[:, 1]
 
-    probability = model.predict_proba(X_test)[:,1]
+    metrics = {
+        "Accuracy": accuracy_score(y_test, prediction),
+        "Precision": precision_score(
+            y_test, prediction, zero_division=0
+        ),
+        "Recall": recall_score(
+            y_test, prediction, zero_division=0
+        ),
+        "F1 Score": f1_score(
+            y_test, prediction, zero_division=0
+        ),
+        "ROC AUC": roc_auc_score(y_test, probability)
+    }
 
-    print("Accuracy :", accuracy_score(y_test, prediction))
+    matrix = confusion_matrix(y_test, prediction)
 
-    print("Precision :", precision_score(y_test, prediction))
+    report = classification_report(
+        y_test,
+        prediction,
+        zero_division=0
+    )
 
-    print("Recall :", recall_score(y_test, prediction))
-
-    print("F1 Score :", f1_score(y_test, prediction))
-
-    print("ROC AUC :", roc_auc_score(y_test, probability))
-
-    print("\nConfusion Matrix\n")
-
-    print(confusion_matrix(y_test, prediction))
-
-    print("\nClassification Report\n")
-
-    print(classification_report(y_test, prediction))
+    return metrics, matrix, report
